@@ -5,8 +5,7 @@ using CounterStrikeSharp.API.Modules.Cvars;
 
 namespace ChaosMod;
 
-
-public class ChaosMod : BasePlugin, IPluginConfig<ChaosModConfig>
+public partial class ChaosMod : BasePlugin, IPluginConfig<ChaosModConfig>
 {
     public override string ModuleName => "Chaos Mod";
     public override string ModuleAuthor => "BOINK";
@@ -16,39 +15,49 @@ public class ChaosMod : BasePlugin, IPluginConfig<ChaosModConfig>
     public ChaosModConfig Config { get; set; } = new();
 
     public required List<BaseEffect> Effects { get; set; }
+
     public override void Load(bool hotReload)
     {
         RegisterEffects();
-
-        RegisterEventHandler<EventRoundStart>((@event, @info) =>
-        {
-            ClearEffects();
-            return HookResult.Continue;
-        });
-
-        RegisterEventHandler<EventRoundEnd>((@event, @info) =>
-        {
-            ClearEffects();
-            return HookResult.Continue;
-        });
-
-        RegisterEventHandler<EventRoundFreezeEnd>((@event, @info) =>
-        {
-            var effect = GetRandomEffect(Effects);
-            if (effect == null)
-                return HookResult.Continue;
-
-            effect.PreStart();
-            return HookResult.Continue;
-        });
-
+        RegisterEvents();
     }
 
-    static BaseEffect GetRandomEffect(List<BaseEffect> list)
+
+    public BaseEffect? GetRandomEffect()
     {
-        Random random = new Random();
-        int randomIndex = random.Next(0, list.Count);
-        return list[randomIndex];
+        var shuffledEffects = new List<BaseEffect>();
+        foreach(var effect in Effects)
+        {
+            shuffledEffects.Add(effect);
+        }
+
+        shuffledEffects.Shuffle();
+
+        BaseEffect? selectedEffect = null;
+        foreach(var effect in shuffledEffects)
+        {
+            if (effect.IsActive) continue;
+            if (!effect.CanRunEffect()) continue;
+
+            bool hasConflict = false;
+            foreach (var conflict in effect.Conflicts)
+            {
+                if (conflict.IsActive)
+                {
+                    hasConflict = true;
+                }
+            }
+
+            if (hasConflict)
+            {
+                continue;
+            }
+
+            selectedEffect = effect;
+            break;
+        }
+ 
+        return selectedEffect;
     }
 
     public override void Unload(bool hotReload)
@@ -69,23 +78,11 @@ public class ChaosMod : BasePlugin, IPluginConfig<ChaosModConfig>
         }
     }
 
-    public void RegisterEffects()
-    {
-        Effects = new List<BaseEffect>
-        {
-            new RapidFire{ },
-            new SlowFire{ },
-        };
+    //public void RegisterEffects()
+    //{
+    //    Init.RegisterEffects(Effects, Conflicts);
 
-        foreach (var effect in Effects)
-        {
-            effect.Plugin = this;
-            effect.Init();
-            if(effect.Duration == 0)
-            {
-                effect.Duration = 15;
-            }
-        }
-    }
+
+    //}
 }
 

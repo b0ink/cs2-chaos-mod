@@ -11,6 +11,7 @@ public class SlowFire : BaseEffect
 
     public override void Init()
     {
+        RegisterConflict<RapidFire>();
         Plugin.RegisterEventHandler<EventWeaponFire>(this.OnWeaponFire);
     }
 

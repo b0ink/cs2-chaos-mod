@@ -13,6 +13,7 @@ public enum EffectDurationType
     Long
 };
 
+
 public abstract class BaseEffect
 {
     public abstract string Name { get; }
@@ -26,9 +27,19 @@ public abstract class BaseEffect
 
     public BasePlugin Plugin { get; set; }
 
+    public List<Type> ConflictTypes = new();
+    public List<BaseEffect> Conflicts = new();
+
     public virtual void Init()
     {
         // Register Events/Listeners here
+    }
+
+
+    public void RegisterConflict<T>()
+    {
+        
+        ConflictTypes.Add(typeof(T));
     }
 
     public void PreStart()
@@ -66,16 +77,17 @@ public abstract class BaseEffect
     public abstract void Start();
     public abstract void Stop();
 
+    // Listeners can be registered per-effect
 
-    public virtual void OnMapStart()
-    {
+    //public virtual void OnMapStart()
+    //{
 
-    }
+    //}
 
-    public virtual void OnTick()
-    {
+    //public virtual void OnTick()
+    //{
 
-    }
+    //}
 
     public virtual bool CanRunEffect()
     {
