@@ -23,11 +23,25 @@ public partial class ChaosMod
 
         RegisterEventHandler<EventRoundFreezeEnd>((@event, @info) =>
         {
-            var effect = GetRandomEffect(Effects);
+            var effect = GetRandomEffect();
             if (effect == null)
                 return HookResult.Continue;
 
             effect.PreStart();
+
+
+            AddTimer(5.0f, () =>
+            {
+                var effect = GetRandomEffect();
+                if (effect == null)
+                {
+                    Console.WriteLine("no valid effect");
+                    return;
+
+                }
+
+                effect.PreStart();
+            });
             return HookResult.Continue;
         });
     }

@@ -30,15 +30,13 @@ public partial class ChaosMod
             }
         }
 
-        //RapidFire rapidFireInstance = Effects.OfType<RapidFire>().FirstOrDefault();
-
         foreach (var effect in Effects)
         {
             foreach (var ConflictType in effect.ConflictTypes)
             {
-                var type = ConflictType.GetType();
-                var effectOfType = Effects.Where(e => e.GetType() == type).FirstOrDefault();
+                var effectOfType = Effects.Where(e => e.GetType() == ConflictType).FirstOrDefault();
                 if (effectOfType == null) continue;
+
                 effect.Conflicts.Add(effectOfType);
                 effectOfType.Conflicts.Add(effect);
             }
