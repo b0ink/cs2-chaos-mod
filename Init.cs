@@ -1,6 +1,7 @@
 ﻿using System;
 using ChaosMod.Effects;
 using System.Linq;
+using System.Reflection;
 
 namespace ChaosMod;
 
@@ -10,15 +11,31 @@ public partial class ChaosMod
     public void RegisterEffects()
     {
 
-        Effects = new List<BaseEffect>
-        {
-            new RapidFire(),
-            new SlowFire(),
-        };
+        //Effects = new List<BaseEffect>
+        //{
+        //    new RapidFire(),
+        //    new SlowFire(),
+        //};
 
+        Effects = new List<BaseEffect>();
 
-        foreach(var effect in Effects)
+        var assembly = Assembly.GetExecutingAssembly();
+        var allTypes = assembly.GetTypes();
+
+        var effectTypes = allTypes.Where(type => type.IsClass && !type.IsAbstract && type.IsSubclassOf(typeof(BaseEffect)));
+
+        foreach (var effectType in effectTypes)
         {
+            var effectInstance = Activator.CreateInstance(effectType) as BaseEffect;
+            if (effectInstance != null)
+            {
+                Effects.Add(effectInstance);
+            }
+        }
+
+        foreach (var effect in Effects)
+        {
+
             effect.Conflicts = new List<BaseEffect>();
             effect.ConflictTypes = new List<Type>();
             effect.Plugin = this;
@@ -42,11 +59,6 @@ public partial class ChaosMod
             }
         }
 
-
-
-
     }
-
-
 }
 
